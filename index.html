@@ -424,31 +424,13 @@ td.num{font-variant-numeric:tabular-nums;font-weight:600}
             <h3 style="font-size:17px">Sincronização na nuvem</h3>
             <span class="badge b-gray" id="cloudStatus">Desconectado</span>
           </div>
-          <p style="color:var(--muted);font-size:14px;margin-bottom:14px">Conecte uma conta gratuita do <b>Supabase</b> para editar no PC e ver atualizado no celular automaticamente. Use o mesmo <b>código do espaço</b> em todos os aparelhos.</p>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:14px">A nuvem <b>já vem configurada</b>. É só clicar abaixo e criar um <b>código do espaço</b> secreto. Use o mesmo código em todos os aparelhos pra tudo ficar sincronizado automaticamente. ☁️</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-primary" id="cloudConfigBtn">Configurar nuvem</button>
+            <button class="btn btn-primary" id="cloudConfigBtn">Ativar sincronização</button>
             <button class="btn" id="cloudSyncNowBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg>Sincronizar agora</button>
             <button class="btn btn-danger" id="cloudDisconnectBtn" style="display:none">Desconectar</button>
           </div>
-          <details style="margin-top:16px">
-            <summary style="cursor:pointer;color:var(--primary);font-size:14px;font-weight:600;list-style:none">▸ Como ativar (passo a passo, ~5 min, grátis)</summary>
-            <div style="font-size:13.5px;color:var(--muted);line-height:1.7;margin-top:12px">
-              <b style="color:var(--text)">1.</b> Crie conta grátis em <b>supabase.com</b> → <i>New project</i> (anote a senha).<br>
-              <b style="color:var(--text)">2.</b> No projeto, abra <b>SQL Editor</b>, cole o código abaixo e clique <i>Run</i>:
-              <pre style="background:#0b0f0d;border:1px solid var(--border);border-radius:10px;padding:12px;margin:8px 0;overflow-x:auto;font-size:12px;color:#cfe9da;white-space:pre">create table if not exists gestao_workspaces (
-  code text primary key,
-  data jsonb not null default '{}'::jsonb,
-  updated_at bigint not null default 0
-);
-alter table gestao_workspaces enable row level security;
-create policy "acesso_publico" on gestao_workspaces
-  for all to anon using (true) with check (true);</pre>
-              <b style="color:var(--text)">3.</b> Vá em <b>Project Settings → API</b>. Copie a <b>Project URL</b> e a chave <b>anon public</b>.<br>
-              <b style="color:var(--text)">4.</b> Clique em <b>Configurar nuvem</b> aqui, cole as duas e invente um <b>código do espaço</b> secreto.<br>
-              <b style="color:var(--text)">5.</b> Em cada aparelho (celular, outro PC), abra o sistema e use o <b>mesmo código</b>. Pronto: tudo sincroniza! ☁️<br>
-              <span style="color:var(--amber)">⚠️ O código do espaço é a sua senha — use um código longo e único e não compartilhe.</span>
-            </div>
-          </details>
+          <div style="font-size:12.5px;color:var(--amber);margin-top:14px">🔒 O código do espaço é a sua senha — use um código longo e único e não compartilhe.</div>
         </div>
         <div class="card card-pad anim" style="max-width:680px;margin-top:16px">
           <h3 style="font-size:17px;margin-bottom:6px">Dados de exemplo</h3>
@@ -494,17 +476,22 @@ create policy "acesso_publico" on gestao_workspaces
 <div class="scrim" id="cloudScrim">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <div><h3>Configurar nuvem</h3><p>Cole os dados do seu projeto Supabase.</p></div>
+      <div><h3>Ativar sincronização</h3><p>A nuvem já está configurada. Só crie um código secreto do seu espaço.</p></div>
       <button class="btn btn-icon btn-ghost" id="cloudClose" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <form id="cloudForm" novalidate>
-      <div class="field" data-key="url"><label>URL do projeto <span class="req">*</span></label><input type="url" name="url" placeholder="https://xxxx.supabase.co" autocomplete="off"><div class="err">Obrigatório</div></div>
-      <div class="field" data-key="key"><label>Chave anon public <span class="req">*</span></label><input type="text" name="key" placeholder="eyJhbGciOiJI..." autocomplete="off"><div class="err">Obrigatório</div></div>
-      <div class="field" data-key="code"><label>Código do espaço (secreto) <span class="req">*</span></label><input type="text" name="code" placeholder="ex: minha-agencia-x9f3k2" autocomplete="off"><div class="err">Obrigatório</div>
-        <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Invente um código único e secreto. Use o <b>mesmo</b> em todos os aparelhos.</div></div>
+      <div class="field" data-key="code"><label>Código do espaço (secreto) <span class="req">*</span></label><input type="text" name="code" placeholder="ex: gestao-vitor-2026-x9k3" autocomplete="off"><div class="err">Obrigatório</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Invente um código único e secreto. Use o <b>mesmo</b> em todos os aparelhos pra sincronizar. 🔒 Guarde bem — é a sua senha.</div></div>
+      <details style="margin-bottom:6px">
+        <summary style="cursor:pointer;color:var(--muted);font-size:13px;list-style:none">⚙️ Configurações avançadas (já preenchidas)</summary>
+        <div style="margin-top:12px">
+          <div class="field" data-key="url"><label>URL do projeto <span class="req">*</span></label><input type="url" name="url" autocomplete="off"><div class="err">Obrigatório</div></div>
+          <div class="field" data-key="key"><label>Chave anon public <span class="req">*</span></label><input type="text" name="key" autocomplete="off"><div class="err">Obrigatório</div></div>
+        </div>
+      </details>
       <div class="modal-foot">
         <button type="button" class="btn" id="cloudCancel">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="cloudSave">Conectar</button>
+        <button type="submit" class="btn btn-primary" id="cloudSave">Ativar nuvem</button>
       </div>
     </form>
   </div>
@@ -960,6 +947,10 @@ function toast(type,msg){
    ============================================================ */
 const CLOUD_KEY='gestao_cloud_cfg';
 const TABLE='gestao_workspaces';
+const DEFAULT_CLOUD={
+  url:'https://ilxwhkdrdsmhkzfdauhe.supabase.co',
+  key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlseHdoa2RyZHNtaGt6ZmRhdWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NzY1MDAsImV4cCI6MjA5NjU1MjUwMH0.mj3lQGPl1nyiHiKYiqtYiZ8e7kVeAQzA7v4kNamqXUA'
+};
 let cloud={client:null,code:null,connected:false,version:0,pushTimer:null,poll:null,busy:false};
 
 function loadCloudCfg(){try{return JSON.parse(localStorage.getItem(CLOUD_KEY))}catch(e){return null}}
@@ -1031,10 +1022,11 @@ function cloudDisconnect(){ stopPoll(); cloud={client:null,code:null,connected:f
 /* cloud config modal */
 function openCloud(){
   const cfg=loadCloudCfg()||{};
-  $('[name="url"]',$('#cloudForm')).value=cfg.url||'';
-  $('[name="key"]',$('#cloudForm')).value=cfg.key||'';
+  $('[name="url"]',$('#cloudForm')).value=cfg.url||DEFAULT_CLOUD.url;
+  $('[name="key"]',$('#cloudForm')).value=cfg.key||DEFAULT_CLOUD.key;
   $('[name="code"]',$('#cloudForm')).value=cfg.code||'';
   openScrim('#cloudScrim');
+  setTimeout(()=>{const c=$('[name="code"]',$('#cloudForm'));c&&c.focus();},130);
 }
 $('#cloudConfigBtn')&&($('#cloudConfigBtn').onclick=openCloud);
 $('#cloudClose')&&($('#cloudClose').onclick=()=>closeScrim('#cloudScrim'));
@@ -1049,9 +1041,9 @@ $('#cloudForm')&&$('#cloudForm').addEventListener('submit',async e=>{
   ['url','key','code'].forEach(k=>{const el=$(`[name="${k}"]`,f);const v=el.value.trim();vals[k]=v;const fe=el.closest('.field');const bad=!v;fe.classList.toggle('invalid',bad);if(bad)ok=false;});
   if(!ok)return;
   vals.url=vals.url.replace(/\/+$/,'');
-  const btn=$('#cloudSave'); btn.disabled=true; btn.textContent='Conectando...';
+  const btn=$('#cloudSave'); btn.disabled=true; btn.textContent='Ativando...';
   const done=await cloudConnect(vals);
-  btn.disabled=false; btn.textContent='Conectar';
+  btn.disabled=false; btn.textContent='Ativar nuvem';
   if(done) closeScrim('#cloudScrim');
 });
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudPull();});
