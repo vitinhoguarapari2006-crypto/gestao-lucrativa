@@ -88,6 +88,7 @@ button{font-family:inherit;cursor:pointer}
 .nav-item:hover{background:var(--surface);color:var(--text)}
 .nav-item.active{background:var(--surface-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
 .nav-item.active::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;border-radius:4px;background:linear-gradient(var(--primary),var(--primary-2))}
+.lead-badge{display:none;margin-left:auto;background:var(--primary);color:#05070a;font-size:11px;font-weight:800;min-width:20px;height:20px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .sidebar-foot{margin-top:auto;font-size:11.5px;color:var(--muted-2);padding:10px 12px;line-height:1.5}
 .sync-pill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;margin-bottom:8px;border:1px solid var(--border)}
 .sync-pill .dot{width:7px;height:7px;border-radius:50%;flex:none}
@@ -324,6 +325,11 @@ td.num{font-variant-numeric:tabular-nums;font-weight:600}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
       Contratos
     </button>
+    <button class="nav-item" data-view="leads">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Leads
+      <span class="lead-badge" id="leadBadge"></span>
+    </button>
     <div class="nav-label">Sistema</div>
     <button class="nav-item" data-view="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -406,6 +412,11 @@ td.num{font-variant-numeric:tabular-nums;font-weight:600}
           <div class="grow"></div>
         </div>
         <div class="card anim"><div class="table-wrap" id="table-contracts"></div></div>
+      </section>
+
+      <!-- ===== LEADS (da landing page) ===== -->
+      <section class="view" id="view-leads">
+        <div class="card anim"><div class="table-wrap" id="leads-content"></div></div>
       </section>
 
       <!-- ===== SETTINGS ===== -->
@@ -637,13 +648,15 @@ function go(view){
   $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));
   const meta=ENTITIES[view];
   const isEntity=!!meta;
-  $('#pageTitle').childNodes[0].nodeValue = isEntity?meta.title:(view==='settings'?'Backup e Dados':'Visão Geral');
-  $('#pageSub').textContent = isEntity?meta.sub:(view==='settings'?'Segurança e exportação':'Resumo do seu negócio');
+  const TITLES={dashboard:['Visão Geral','Resumo do seu negócio'],settings:['Backup e Dados','Segurança e exportação'],leads:['Leads','Contatos recebidos da sua landing page']};
+  if(isEntity){ $('#pageTitle').childNodes[0].nodeValue=meta.title; $('#pageSub').textContent=meta.sub; }
+  else { const t=TITLES[view]||TITLES.dashboard; $('#pageTitle').childNodes[0].nodeValue=t[0]; $('#pageSub').textContent=t[1]; }
   const addBtn=$('#addBtn');
   if(isEntity){addBtn.style.display='inline-flex';$('#addBtnLabel').textContent='Novo '+meta.singular.toLowerCase();}
   else addBtn.style.display='none';
   if(isEntity) renderTable(view);
   if(view==='dashboard') renderDashboard();
+  if(view==='leads') renderLeads();
   closeNav();
   $('.content').scrollTo?.(0,0); window.scrollTo(0,0);
 }
@@ -986,7 +999,8 @@ async function cloudConnect(cfg,opts={}){
         DB=normalizeDB(data.data); cloud.version=remoteV; saveLocalOnly(); go(current);
       } else { await cloudPush(true); }
     } else { await cloudPush(true); }
-    startPoll(); updateCloudUI();
+    startPoll(); updateCloudUI(); refreshLeadCount();
+    if(current==='leads') renderLeads();
     if(!silent) toast('ok','Nuvem conectada e sincronizada');
     return true;
   }catch(e){
@@ -1015,8 +1029,59 @@ async function cloudPull(){
   }catch(e){console.warn('cloudPull',e);}
   cloud.busy=false;
 }
-function startPoll(){ stopPoll(); cloud.poll=setInterval(()=>{if(document.visibilityState==='visible')cloudPull();},8000); }
+function startPoll(){ stopPoll(); cloud.poll=setInterval(()=>{if(document.visibilityState==='visible'){cloudPull();refreshLeadCount();}},8000); }
 function stopPoll(){ if(cloud.poll)clearInterval(cloud.poll); cloud.poll=null; }
+
+/* ============ LEADS (vindos da landing page) ============ */
+async function fetchLeads(){
+  if(!cloud.connected||!cloud.client) return null;
+  try{
+    const {data,error}=await cloud.client.from(TABLE).select('code,data,updated_at').like('code','lead_%').order('updated_at',{ascending:false});
+    if(error)throw error; return data||[];
+  }catch(e){ console.warn('fetchLeads',e); return []; }
+}
+function updateLeadBadge(n){ const b=$('#leadBadge'); if(!b)return; if(n>0){b.textContent=n;b.style.display='inline-flex';}else{b.style.display='none';} }
+async function refreshLeadCount(){
+  if(!cloud.connected||!cloud.client)return;
+  try{ const {count,error}=await cloud.client.from(TABLE).select('code',{count:'exact',head:true}).like('code','lead_%'); if(!error)updateLeadBadge(count||0); }catch(e){}
+}
+async function renderLeads(){
+  const wrap=$('#leads-content');
+  if(!cloud.connected){
+    wrap.innerHTML=`<div class="empty"><div class="ie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h4>Ative a sincronização na nuvem</h4><p>Os leads do formulário da sua landing page aparecem aqui depois que você ativar a nuvem.</p><button class="btn btn-primary" data-goto="settings">Ir para Backup e Dados</button></div>`;
+    const b=$('[data-goto="settings"]',wrap); if(b)b.onclick=()=>go('settings'); return;
+  }
+  wrap.innerHTML=`<div class="empty"><p>Carregando leads...</p></div>`;
+  const leads=await fetchLeads();
+  updateLeadBadge(leads?leads.length:0);
+  if(!leads||!leads.length){
+    wrap.innerHTML=`<div class="empty"><div class="ie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h4>Nenhum lead ainda</h4><p>Quando alguém preencher o formulário da sua landing page, o contato aparece aqui automaticamente.</p></div>`; return;
+  }
+  const rows=leads.map(L=>{const d=L.data||{};return `<tr>
+    <td><div class="cli">${esc(d.nome||'—')}<small>${esc(d.email||'')}</small></div></td>
+    <td>${esc(d.whatsapp||'—')}</td>
+    <td><span class="badge b-blue">${esc(d.segmento||'—')}</span></td>
+    <td>${esc(d.faturamento||'—')}</td>
+    <td>${d.data?fmtDate(d.data):'—'}</td>
+    <td class="num"><div class="row-actions">
+      <button class="btn btn-sm" data-crm="${esc(L.code)}" title="Adicionar ao CRM">+ CRM</button>
+      <button class="btn btn-icon btn-danger" data-dellead="${esc(L.code)}" aria-label="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+    </div></td></tr>`;}).join('');
+  wrap.innerHTML=`<table><thead><tr><th>Contato</th><th>WhatsApp</th><th>Segmento</th><th>Faturamento</th><th>Data</th><th class="num">Ações</th></tr></thead><tbody>${rows}</tbody></table>`;
+  $$('[data-crm]',wrap).forEach(b=>b.onclick=()=>leadToCRM(b.dataset.crm,leads));
+  $$('[data-dellead]',wrap).forEach(b=>b.onclick=()=>leadDelete(b.dataset.dellead));
+}
+async function leadToCRM(code,leads){
+  const L=(leads||[]).find(x=>x.code===code); if(!L)return; const d=L.data||{};
+  DB.meetings.unshift({id:uid(),cliente:d.nome||'Lead',contato:[d.whatsapp,d.email].filter(Boolean).join(' · '),data:d.data||todayISO(),hora:'',etapa:'Lead',valor:'',notas:`Veio da Landing Page. Segmento: ${d.segmento||'-'} · Faturamento: ${d.faturamento||'-'}`});
+  save();
+  try{ await cloud.client.from(TABLE).delete().eq('code',code); }catch(e){}
+  toast('ok','Lead adicionado ao CRM (Reuniões)'); renderLeads();
+}
+async function leadDelete(code){
+  try{ await cloud.client.from(TABLE).delete().eq('code',code); }catch(e){}
+  toast('info','Lead excluído'); renderLeads();
+}
 function cloudDisconnect(){ stopPoll(); cloud={client:null,code:null,connected:false,version:0,pushTimer:null,poll:null,busy:false}; localStorage.removeItem(CLOUD_KEY); updateCloudUI(); toast('info','Nuvem desconectada. Seus dados continuam neste aparelho.'); }
 
 /* cloud config modal */
