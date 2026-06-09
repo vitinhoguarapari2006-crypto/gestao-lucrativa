@@ -34,41 +34,22 @@ automaticamente, vira **app instalável** e **sincroniza entre seus aparelhos**.
 
 ## ☁️ SINCRONIZAR entre celular e PC (modo nuvem)
 
-Assim você edita no PC e aparece atualizado no celular sozinho. É **grátis**.
-Você faz isso **uma vez**:
+**A nuvem já vem configurada!** Você edita no PC e aparece atualizado no
+celular sozinho. Só precisa criar um código secreto:
 
-### Parte A — Criar o banco na nuvem (~5 min)
-1. Crie conta grátis em **https://supabase.com** → **New project** (guarde a senha).
-2. Espere o projeto criar. Abra **SQL Editor** (menu lateral) → **New query**.
-3. Cole este código e clique **Run**:
-   ```sql
-   create table if not exists gestao_workspaces (
-     code text primary key,
-     data jsonb not null default '{}'::jsonb,
-     updated_at bigint not null default 0
-   );
-   alter table gestao_workspaces enable row level security;
-   create policy "acesso_publico" on gestao_workspaces
-     for all to anon using (true) with check (true);
-   ```
-4. Vá em **Project Settings** (engrenagem) → **API**. Copie:
-   - **Project URL** (ex: `https://abcd.supabase.co`)
-   - **Project API keys → `anon` `public`** (uma chave bem longa)
+### Ativar (faça em cada aparelho)
+1. Abra o sistema → **Backup e Dados → Ativar sincronização**.
+2. Invente um **Código do espaço** secreto e único
+   (ex: `gestao-vitor-2026-k9x3`). **Anote esse código!**
+3. Clique **Ativar nuvem**. Vai aparecer ☁️ "Sincronizado na nuvem".
+4. Nos outros aparelhos (celular, tablet, outro PC): mesma coisa, usando o
+   **MESMO código**. Pronto — tudo igual e atualizado em todos! 🎉
 
-### Parte B — Conectar no sistema
-1. No sistema, vá em **Backup e Dados → Configurar nuvem**.
-2. Cole a **URL** e a **chave anon**.
-3. Invente um **Código do espaço** secreto e único
-   (ex: `gestao-vitor-2026-k9x3`). **Anote esse código.**
-4. Clique **Conectar**. Vai aparecer ☁️ "Sincronizado na nuvem".
+> 🔒 O **código do espaço é a sua senha**. Use um código longo e único e
+> **não compartilhe** — quem tiver ele acessa seus dados.
 
-### Parte C — Usar nos outros aparelhos
-Abra o sistema no celular/tablet/outro PC → **Configurar nuvem** →
-cole a mesma URL, a mesma chave e o **MESMO código do espaço**. Pronto:
-tudo igual e atualizado em todos! 🎉
-
-> 🔒 O **código do espaço é sua senha**. Use um código longo e único e não
-> compartilhe — quem tiver ele acessa seus dados.
+> Obs.: a URL e a chave do banco (Supabase) já estão embutidas no sistema,
+> em "Configurações avançadas". Você não precisa mexer nelas.
 
 ---
 
