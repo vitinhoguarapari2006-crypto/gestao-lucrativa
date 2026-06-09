@@ -1113,9 +1113,19 @@ $('#cloudForm')&&$('#cloudForm').addEventListener('submit',async e=>{
 });
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudPull();});
 
-/* ---------- service worker (PWA) ---------- */
+/* ---------- service worker (PWA) com auto-atualização ---------- */
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let _reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(_reloaded)return; _reloaded=true; location.reload(); });
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.update();
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      nw&&nw.addEventListener('statechange',()=>{
+        if(nw.state==='installed'&&navigator.serviceWorker.controller){ nw.postMessage('skip'); }
+      });
+    });
+  }).catch(()=>{});
 }
 
 /* ---------- boot ---------- */
